@@ -1,161 +1,118 @@
 @extends('layout')
 
 @section('content')
-    <style>
-        body {
-            background-color: #ffffff;
-            color: #1a1a1a;
-            font-family: 'Segoe UI', sans-serif;
-        }
+    <div class="container">
+        <h3 class="text-primary mb-3">Category List</h3>
 
-        h3 {
-            color: #0a2a63;
-            border-bottom: 2px solid #0a2a63;
-            padding-bottom: 5px;
-        }
+        {{-- Alert --}}
+        @if (session('error'))
+            <div class="alert alert-danger">{{ session('error') }}</div>
+        @endif
+        @if (session('success'))
+            <div class="alert alert-success">{{ session('success') }}</div>
+        @endif
 
-        a, button {
-            background-color: #0a2a63;
-            color: white;
-            padding: 6px 12px;
-            text-decoration: none;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 14px;
-        }
+        {{-- Add Button & Search --}}
+        <div class="d-flex justify-content-between mb-3">
+            <a href="{{ route('category.create') }}" class="btn btn-primary">+ Add New Category</a>
 
-        a:hover, button:hover {
-            background-color: #08386f;
-        }
+            <form method="GET" action="{{ route('category.index') }}" class="d-flex">
+                <input type="text" name="search" placeholder="Search..." class="form-control me-2"
+                    value="{{ request('search') }}">
+                <button class="btn btn-outline-primary" type="submit">Search</button>
+            </form>
+        </div>
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-
-        table th, table td {
-            border: 1px solid #cccccc;
-            padding: 10px;
-            text-align: left;
-        }
-
-        table th {
-            background-color: #0a2a63;
-            color: white;
-        }
-
-        .modal {
-            display: none;
-            position: fixed;
-            top: 15%;
-            left: 50%;
-            transform: translate(-50%, 0);
-            background-color: #ffffff;
-            border: 2px solid #0a2a63;
-            padding: 20px;
-            z-index: 9999;
-            border-radius: 8px;
-            width: 400px;
-        }
-
-        .modal h4 {
-            color: #0a2a63;
-        }
-
-        .modal input {
-            width: 100%;
-            padding: 8px;
-            margin-bottom: 10px;
-        }
-
-        .modal button {
-            margin-right: 8px;
-        }
-    </style>
-
-    <h3>Category List</h3>
-    <a href="{{ route('category.create') }}">+ Add New Category</a>
-
-    <!-- Form Search -->
-    <form method="GET" action="{{ route('category.index') }}" style="margin-top: 10px;">
-        <input type="text" name="search" placeholder="Search category..." value="{{ request('search') }}" style="padding: 6px; width: 250px;">
-    </form>
-
-    <table>
-        <thead>
-            <tr>
-                <th>No</th>
-                <th>ktgr</th>
-                <th>Slug</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            @if($categories->count())
-                @foreach($categories as $i => $category)
+        {{-- Category Table --}}
+        <div class="table-responsive">
+            <table class="table table-bordered table-striped align-middle">
+                <thead class="table-primary text-center">
                     <tr>
-                        <td>{{ $i + 1 }}</td>
-                        <td>{{ $category->name }}</td>
-                        <td>{{ $category->slug }}</td>
-                        <td>
-                            <button onclick="showDetail({{ $category->id }})">Detail</button>
-                            <button onclick="showEdit({{ $category->id }})">Edit</button>
-                            <form action="{{ route('category.destroy', $category->id) }}" method="POST" style="display:inline;">
-                                @csrf
-                                @method('DELETE')
-                                <button onclick="return confirm('Yakin hapus?')">Delete</button>
-                            </form>
-                        </td>
+                        <th>No</th>
+                        <th>Name</th>
+                        <th>Slug</th>
+                        <th>Action</th>
                     </tr>
+                </thead>
+                <tbody>
+                    @forelse ($categories as $index => $category)
+                        <tr class="text-center">
+                            <td>{{ $index + 1 }}</td>
+                            <td>{{ $category->name }}</td>
+                            <td>{{ $category->slug }}</td>
+                            <td>
+                                <button class="btn btn-sm btn-info me-1" data-bs-toggle="modal"
+                                    data-bs-target="#detailModal{{ $category->id }}">Detail</button>
 
-                    <!-- Detail Modal -->
-                    <div id="detail-modal-{{ $category->id }}" class="modal">
-                        <h4>Category Detail</h4>
-                        <p><strong>ktgr:</strong> {{ $category->name }}</p>
-                        <p><strong>Slug:</strong> {{ $category->slug }}</p>
-                        <p><strong>Created:</strong> {{ $category->created_at }}</p>
-                        <p><strong>Updated:</strong> {{ $category->updated_at }}</p>
-                        <button onclick="hideDetail({{ $category->id }})">Close</button>
-                    </div>
+                                <button class="btn btn-sm btn-warning me-1" data-bs-toggle="modal"
+                                    data-bs-target="#editModal{{ $category->id }}">Edit</button>
 
-                    <!-- Edit Modal -->
-                    <div id="edit-modal-{{ $category->id }}" class="modal">
-                        <h4>Edit Category</h4>
-                        <form action="{{ route('category.update', $category->id) }}" method="POST">
-                            @csrf
-                            @method('PUT')
-                            <input type="text" name="name" value="{{ $category->name }}" required>
-                            <input type="text" name="slug" value="{{ $category->slug }}" required>
-                            <button type="submit">Update</button>
-                            <button type="button" onclick="hideEdit({{ $category->id }})">Cancel</button>
-                        </form>
-                    </div>
-                @endforeach
-            @else
-                <tr>
-                    <td colspan="4" style="text-align: center; color: red;">Data kategori tidak ditemukan.</td>
-                </tr>
-            @endif
-        </tbody>
-    </table>
+                                <form action="{{ route('category.destroy', $category->id) }}" method="POST"
+                                    style="display:inline-block;" onsubmit="return confirm('Are you sure?')">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button class="btn btn-sm btn-danger">Delete</button>
+                                </form>
+                            </td>
+                        </tr>
 
-    <script>
-        function showDetail(id) {
-            document.getElementById('detail-modal-' + id).style.display = 'block';
-        }
+                        {{-- Detail Modal --}}
+                        <div class="modal fade" id="detailModal{{ $category->id }}" tabindex="-1" aria-labelledby="detailLabel{{ $category->id }}" aria-hidden="true">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header bg-primary text-white">
+                                        <h5 class="modal-title" id="detailLabel{{ $category->id }}">Category Detail</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <p><strong>Name:</strong> {{ $category->name }}</p>
+                                        <p><strong>Slug:</strong> {{ $category->slug }}</p>
+                                        <p><strong>Created:</strong> {{ $category->created_at }}</p>
+                                        <p><strong>Updated:</strong> {{ $category->updated_at }}</p>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
 
-        function hideDetail(id) {
-            document.getElementById('detail-modal-' + id).style.display = 'none';
-        }
-
-        function showEdit(id) {
-            document.getElementById('edit-modal-' + id).style.display = 'block';
-        }
-
-        function hideEdit(id) {
-            document.getElementById('edit-modal-' + id).style.display = 'none';
-        }
-    </script>
+                        {{-- Edit Modal --}}
+                        <div class="modal fade" id="editModal{{ $category->id }}" tabindex="-1" aria-labelledby="editLabel{{ $category->id }}" aria-hidden="true">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <form action="{{ route('category.update', $category->id) }}" method="POST">
+                                        @csrf
+                                        @method('PUT')
+                                        <div class="modal-header bg-warning">
+                                            <h5 class="modal-title" id="editLabel{{ $category->id }}">Edit Category</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <div class="mb-2">
+                                                <label>Name</label>
+                                                <input type="text" name="name" value="{{ $category->name }}" class="form-control" required>
+                                            </div>
+                                            <div class="mb-2">
+                                                <label>Slug</label>
+                                                <input type="text" name="slug" value="{{ $category->slug }}" class="form-control" required>
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="submit" class="btn btn-warning">Update</button>
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    @empty
+                        <tr>
+                            <td colspan="4" class="text-center text-danger">Data kategori tidak ditemukan.</td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+    </div>
 @endsection
