@@ -1,234 +1,238 @@
 @extends('layout')
 
-@if(session('error'))
-    <div style="background-color: #ffe5e5; padding: 10px; border: 1px solid red; color: red; border-radius: 5px; margin-bottom: 15px;">
-        <strong>Peringatan:</strong> {{ session('error') }}
-    </div>
-@endif
-
-@if(session('success'))
-    <div style="background-color: #e5ffea; padding: 10px; border: 1px solid green; color: green; border-radius: 5px; margin-bottom: 15px;">
-        <strong>Berhasil:</strong> {{ session('success') }}
-    </div>
-@endif
-
 @section('content')
-    <h3 style="color: #1e88e5;">Book List</h3>
-    <a href="{{ route('book.create') }}" class="btn-blue">+ Add New Book</a>
+    <div class="container">
+        <h3 class="text-primary mb-3">Book List</h3>
 
-    <form method="GET" action="{{ route('book.index') }}" id="filterForm" style="margin: 20px 0;">
-        <input type="text" name="search" placeholder="Search by title, author, ISBN, publisher"
-               value="{{ request('search') }}" onkeydown="if(event.key === 'Enter') this.form.submit();">
+        {{-- Alert --}}
+        @if (session('error'))
+            <div class="alert alert-danger">{{ session('error') }}</div>
+        @endif
+        @if (session('success'))
+            <div class="alert alert-success">{{ session('success') }}</div>
+        @endif
 
-        <select name="sort" onchange="document.getElementById('filterForm').submit();">
-            <option value="">-- Sort By --</option>
-            <option value="year_desc" {{ request('sort') == 'year_desc' ? 'selected' : '' }}>Tahun Terbaru</option>
-            <option value="year_asc" {{ request('sort') == 'year_asc' ? 'selected' : '' }}>Tahun Terlama</option>
-            <option value="stock_desc" {{ request('sort') == 'stock_desc' ? 'selected' : '' }}>Stok Terbanyak</option>
-            <option value="stock_asc" {{ request('sort') == 'stock_asc' ? 'selected' : '' }}>Stok Tersedikit</option>
-        </select>
-    </form>
+        {{-- Add Button & Search --}}
+        <div class="d-flex justify-content-between mb-3">
+            <a href="{{ route('book.create') }}" class="btn btn-primary">+ Add New Book</a>
 
-    @if($books->isEmpty())
-        <p><strong>Data tidak ditemukan.</strong></p>
-    @else
-    <table class="book-table">
-        <thead>
-            <tr>
-                <th>No</th>
-                <th>Title</th>
-                <th>Author</th>
-                <th>Publisher</th>
-                <th>Year</th>
-                <th>ISBN</th>
-                <th>Stock</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach($books as $book)
-                <tr>
-                    <td>{{ $loop->iteration }}</td>
-                    <td>{{ $book->title }}</td>
-                    <td>{{ $book->author }}</td>
-                    <td>{{ $book->publisher->name }}</td>
-                    <td>{{ $book->year }}</td>
-                    <td>{{ $book->isbn }}</td>
-                    <td>{{ $book->stock }}</td>
-                    <td>
-                        <button class="btn-detail" onclick="showDetail({{ $book->id }})">Detail</button>
-                        <button class="btn-edit" onclick="showEdit({{ $book->id }})">Edit</button>
-                        <form action="{{ route('book.destroy', $book->id) }}" method="POST" style="display:inline;">
-                            @csrf
-                            @method('DELETE')
-                            <button class="btn-delete" onclick="return confirm('Are you sure?')">Delete</button>
-                        </form>
-                    </td>
-                </tr>
+            <form method="GET" action="{{ route('book.index') }}" class="d-flex">
+                <input type="text" name="search" placeholder="Search by title, author, ISBN, publisher"
+                       value="{{ request('search') }}" class="form-control me-2">
+                <select name="sort" class="form-select me-2" onchange="this.form.submit()">
+                    <option value="">-- Sort By --</option>
+                    <option value="year_desc" {{ request('sort') == 'year_desc' ? 'selected' : '' }}>Tahun Terbaru</option>
+                    <option value="year_asc" {{ request('sort') == 'year_asc' ? 'selected' : '' }}>Tahun Terlama</option>
+                    <option value="stock_desc" {{ request('sort') == 'stock_desc' ? 'selected' : '' }}>Stok Terbanyak</option>
+                    <option value="stock_asc" {{ request('sort') == 'stock_asc' ? 'selected' : '' }}>Stok Tersedikit</option>
+                </select>
+                <button class="btn btn-outline-primary" type="submit">Cari</button>
+            </form>
+        </div>
 
-                <div id="detail-modal-{{ $book->id }}" class="modal">
-                    <div class="modal-content">
-                        <h4>Book Detail</h4>
-                        <p><strong>Title:</strong> {{ $book->title }}</p>
-                        <p><strong>Author:</strong> {{ $book->author }}</p>
-                        <p><strong>Publisher:</strong> {{ $book->publisher->name }}</p>
-                        <p><strong>Year:</strong> {{ $book->year }}</p>
-                        <p><strong>ISBN:</strong> {{ $book->isbn }}</p>
-                        <p><strong>Stock:</strong> {{ $book->stock }}</p>
-                        <p><strong>Categories:</strong> {{ $book->categories->pluck('name')->join(', ') }}</p>
-                        <p><strong>Detail:</strong></p>
-                        @if ($book->detail)
-                        <ul>
-                            <li>Shelf Code: {{ $book->detail->shelf_code }}</li>
-                            <li>Pages: {{ $book->detail->pages }}</li>
-                            <li>Weight: {{ $book->detail->weight }}</li>
-                            <li>Language: {{ $book->detail->language }}</li>
-                            <li>Size: {{ $book->detail->size }}</li>
-                            <li>Condition: {{ $book->detail->book_condition }}</li>
-                        </ul>
-                        @else
-                            <p><em>Detail buku belum tersedia.</em></p>
-                        @endif
+        {{-- Book Table --}}
+        <div class="table-responsive">
+            <table class="table table-bordered table-striped align-middle">
+                <thead class="table-primary text-center">
+                    <tr>
+                        <th>No</th>
+                        <th>Judul</th>
+                        <th>Author</th>
+                        <th>Publisher</th>
+                        <th>Tahun</th>
+                        <th>ISBN</th>
+                        <th>Stok</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse($books as $index => $book)
+                        <tr class="text-center">
+                            <td>{{ $index + 1 }}</td>
+                            <td>{{ $book->title }}</td>
+                            <td>{{ $book->author }}</td>
+                            <td>{{ $book->publisher->name }}</td>
+                            <td>{{ $book->year }}</td>
+                            <td>{{ $book->isbn }}</td>
+                            <td>{{ $book->stock }}</td>
+                            <td>
+                                <button class="btn btn-sm btn-info me-1" data-bs-toggle="modal" 
+                                        data-bs-target="#detailModal{{ $book->id }}">Detail</button>
+                                <button class="btn btn-sm btn-warning me-1" data-bs-toggle="modal" 
+                                        data-bs-target="#editModal{{ $book->id }}">Edit</button>
+                                <form action="{{ route('book.destroy', $book->id) }}" method="POST" 
+                                      style="display:inline-block;" onsubmit="return confirm('Are you sure?')">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button class="btn btn-sm btn-danger">Delete</button>
+                                </form>
+                            </td>
+                        </tr>
 
-                        <button onclick="hideDetail({{ $book->id }})" class="btn-close">Close</button>
-                    </div>
-                </div>
-
-                <div id="edit-modal-{{ $book->id }}" class="modal">
-                    <div class="modal-content">
-                        <h4>Edit Book</h4>
-                        <form action="{{ route('book.update', $book->id) }}" method="POST">
-                            @csrf
-                            @method('PUT')
-                            <p>Title: <input type="text" name="title" value="{{ $book->title }}"></p>
-                            <p>Author: <input type="text" name="author" value="{{ $book->author }}"></p>
-                            <p>Publisher:
-                                <select name="publisher_id">
-                                    @foreach($publishers as $publisher)
-                                        <option value="{{ $publisher->id }}" {{ $book->publisher_id == $publisher->id ? 'selected' : '' }}>
-                                            {{ $publisher->name }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                            </p>
-                            <p>Year: <input type="number" name="year" value="{{ $book->year }}"></p>
-                            <p>ISBN: <input type="text" name="isbn" value="{{ $book->isbn }}"></p>
-                            <p>Stock: <input type="number" name="stock" value="{{ $book->stock }}"></p>
-
-                            <p>Categories:</p>
-                            <div style="display: flex; flex-wrap: wrap; gap: 10px;">
-                                @foreach($categories as $cat)
-                                    <label style="display: flex; align-items: center;">
-                                        <input type="checkbox" name="category_ids[]" value="{{ $cat->id }}"
-                                            {{ $book->categories->contains($cat->id) ? 'checked' : '' }}>
-                                        <span style="margin-left: 5px;">{{ $cat->name }}</span>
-                                    </label>
-                                @endforeach
+                        {{-- Detail Modal --}}
+                        <div class="modal fade" id="detailModal{{ $book->id }}" tabindex="-1" 
+                             aria-labelledby="detailLabel{{ $book->id }}" aria-hidden="true">
+                            <div class="modal-dialog modal-lg">
+                                <div class="modal-content">
+                                    <div class="modal-header bg-info text-white">
+                                        <h5 class="modal-title" id="detailLabel{{ $book->id }}">Detail Buku</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <p><strong>Judul:</strong> {{ $book->title }}</p>
+                                                <p><strong>Author:</strong> {{ $book->author }}</p>
+                                                <p><strong>Publisher:</strong> {{ $book->publisher->name }}</p>
+                                                <p><strong>Tahun:</strong> {{ $book->year }}</p>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <p><strong>ISBN:</strong> {{ $book->isbn }}</p>
+                                                <p><strong>Stok:</strong> {{ $book->stock }}</p>
+                                                <p><strong>Kategori:</strong> {{ $book->categories->pluck('name')->join(', ') }}</p>
+                                            </div>
+                                        </div>
+                                        
+                                        <hr>
+                                        <h6 class="text-primary">Book Details:</h6>
+                                        @if ($book->detail)
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <p><strong>Shelf Code:</strong> {{ $book->detail->shelf_code }}</p>
+                                                    <p><strong>Pages:</strong> {{ $book->detail->pages }}</p>
+                                                    <p><strong>Weight:</strong> {{ $book->detail->weight }}</p>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <p><strong>Language:</strong> {{ $book->detail->language }}</p>
+                                                    <p><strong>Size:</strong> {{ $book->detail->size }}</p>
+                                                    <p><strong>Condition:</strong> {{ $book->detail->book_condition }}</p>
+                                                </div>
+                                            </div>
+                                        @else
+                                            <p class="text-muted"><em>Detail buku belum tersedia.</em></p>
+                                        @endif
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                    </div>
+                                </div>
                             </div>
+                        </div>
 
-                            <hr>
-                            <p>Shelf Code: <input type="text" name="shelf_code" value="{{ $book->detail->shelf_code ?? '' }}"></p>
-                            <p>Weight: <input type="number" name="weight" value="{{ $book->detail->weight ?? '' }}"></p>
-                            <p>Language: <input type="text" name="language" value="{{ $book->detail->language ?? '' }}"></p>
-                            <p>Size: <input type="text" name="size" value="{{ $book->detail->size ?? '' }}"></p>
-                            <p>Condition:
-                                <select name="book_condition">
-                                    <option value="">-- Pilih --</option>
-                                    <option value="baru" {{ ($book->detail->book_condition ?? '') == 'baru' ? 'selected' : '' }}>Baru</option>
-                                    <option value="bekas" {{ ($book->detail->book_condition ?? '') == 'bekas' ? 'selected' : '' }}>Bekas</option>
-                                </select>
-                            </p>
-                            <button type="submit" class="btn-blue">Update</button>
-                            <button type="button" onclick="hideEdit({{ $book->id }})" class="btn-close">Cancel</button>
-                        </form>
-                    </div>
-                </div>
-            @endforeach
-        </tbody>
-    </table>
-    @endif
+                        {{-- Edit Modal --}}
+                        <div class="modal fade" id="editModal{{ $book->id }}" tabindex="-1" 
+                             aria-labelledby="editLabel{{ $book->id }}" aria-hidden="true">
+                            <div class="modal-dialog modal-lg">
+                                <div class="modal-content">
+                                    <form action="{{ route('book.update', $book->id) }}" method="POST" class="modal-content">
+                                        @csrf
+                                        @method('PUT')
+                                        <div class="modal-header bg-warning">
+                                            <h5 class="modal-title" id="editLabel{{ $book->id }}">Edit Buku</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Judul</label>
+                                                        <input type="text" name="title" value="{{ $book->title }}" class="form-control" required>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Author</label>
+                                                        <input type="text" name="author" value="{{ $book->author }}" class="form-control" required>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Publisher</label>
+                                                        <select name="publisher_id" class="form-select" required>
+                                                            @foreach($publishers as $publisher)
+                                                                <option value="{{ $publisher->id }}" {{ $book->publisher_id == $publisher->id ? 'selected' : '' }}>
+                                                                    {{ $publisher->name }}
+                                                                </option>
+                                                            @endforeach
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Tahun</label>
+                                                        <input type="number" name="year" value="{{ $book->year }}" class="form-control" required>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label class="form-label">ISBN</label>
+                                                        <input type="text" name="isbn" value="{{ $book->isbn }}" class="form-control">
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Stok</label>
+                                                        <input type="number" name="stock" value="{{ $book->stock }}" class="form-control" required>
+                                                    </div>
+                                                </div>
+                                            </div>
 
-    <script>
-        function showDetail(id) {
-            document.getElementById('detail-modal-' + id).style.display = 'block';
-        }
-        function hideDetail(id) {
-            document.getElementById('detail-modal-' + id).style.display = 'none';
-        }
-        function showEdit(id) {
-            document.getElementById('edit-modal-' + id).style.display = 'block';
-        }
-        function hideEdit(id) {
-            document.getElementById('edit-modal-' + id).style.display = 'none';
-        }
-    </script>
+                                            <div class="mb-3">
+                                                <label class="form-label">Kategori</label>
+                                                <div class="d-flex flex-wrap gap-2">
+                                                    @foreach($categories as $cat)
+                                                        <div class="form-check">
+                                                            <input type="checkbox" name="category_ids[]" value="{{ $cat->id }}"
+                                                                class="form-check-input" id="cat{{ $cat->id }}_{{ $book->id }}"
+                                                                {{ $book->categories->contains($cat->id) ? 'checked' : '' }}>
+                                                            <label class="form-check-label" for="cat{{ $cat->id }}_{{ $book->id }}">
+                                                                {{ $cat->name }}
+                                                            </label>
+                                                        </div>
+                                                    @endforeach
+                                                </div>
+                                            </div>
+
+                                            <hr>
+                                            <h6 class="text-primary">Detail Buku</h6>
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Kode Rak</label>
+                                                        <input type="text" name="shelf_code" value="{{ $book->detail->shelf_code ?? '' }}" class="form-control">
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Berat</label>
+                                                        <input type="number" name="weight" value="{{ $book->detail->weight ?? '' }}" class="form-control">
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Bahasa</label>
+                                                        <input type="text" name="language" value="{{ $book->detail->language ?? '' }}" class="form-control">
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Ukuran</label>
+                                                        <input type="text" name="size" value="{{ $book->detail->size ?? '' }}" class="form-control">
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Kondisi</label>
+                                                        <select name="book_condition" class="form-select">
+                                                            <option value="">-- Pilih --</option>
+                                                            <option value="baru" {{ ($book->detail->book_condition ?? '') == 'baru' ? 'selected' : '' }}>Baru</option>
+                                                            <option value="bekas" {{ ($book->detail->book_condition ?? '') == 'bekas' ? 'selected' : '' }}>Bekas</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="submit" class="btn btn-warning">Perbarui</button>
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    @empty
+                        <tr>
+                            <td colspan="8" class="text-center text-danger">Data buku tidak ditemukan.</td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+    </div>
 @endsection
-
-@push('styles')
-<style>
-    .btn-blue {
-        background-color: #1e88e5;
-        color: white;
-        padding: 6px 12px;
-        border: none;
-        border-radius: 4px;
-        text-decoration: none;
-        cursor: pointer;
-    }
-    .btn-blue:hover { background-color: #1565c0; }
-    .btn-detail, .btn-edit, .btn-delete, .btn-close {
-        margin: 2px;
-        padding: 5px 10px;
-        font-size: 0.9rem;
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
-    }
-    .btn-detail { background-color: #42a5f5; color: white; }
-    .btn-edit { background-color: #4caf50; color: white; }
-    .btn-delete { background-color: #e53935; color: white; }
-    .btn-close { background-color: #757575; color: white; }
-    .btn-detail:hover { background-color: #1e88e5; }
-    .btn-edit:hover { background-color: #388e3c; }
-    .btn-delete:hover { background-color: #c62828; }
-    .btn-close:hover { background-color: #616161; }
-    .book-table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-top: 15px;
-    }
-    .book-table th, .book-table td {
-        padding: 10px;
-        border: 1px solid #ccc;
-        text-align: left;
-    }
-    .modal {
-        display: none;
-        position: fixed;
-        top: 5%;
-        left: 50%;
-        transform: translateX(-50%);
-        background-color: white;
-        border: 1px solid #ddd;
-        padding: 20px;
-        z-index: 1000;
-        width: 60%;
-        max-width: 600px;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-        border-radius: 8px;
-    }
-    .modal-content h4 {
-        margin-top: 0;
-        color: #1e88e5;
-    }
-    .modal-content p, .modal-content ul {
-        margin-bottom: 10px;
-        color: #333;
-    }
-    .modal-content input, .modal-content select {
-        width: 100%;
-        padding: 6px;
-        margin-bottom: 10px;
-    }
-</style>
-@endpush
