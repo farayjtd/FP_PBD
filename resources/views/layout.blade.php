@@ -1,72 +1,34 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
     <title>Dashboard</title>
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            background-color: #ffffff;
-            color: #333;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-
-        .container {
-            max-width: 1000px;
-            margin: auto;
-            padding: 30px;
-        }
-
-        h2 {
-            color: #1e88e5;
-            text-align: center;
-            margin-bottom: 20px;
-        }
-
-        nav {
-            background-color: #1e88e5;
-            padding: 15px;
-            text-align: center;
-        }
-
-        nav a {
-            color: #ffffff;
-            margin: 0 10px;
-            text-decoration: none;
-            font-weight: 600;
-        }
-
-        nav a:hover {
-            text-decoration: underline;
-        }
-
-        hr {
-            border: 0;
-            border-top: 1px solid #ccc;
-            margin: 0;
-        }
-
-        .content {
-            padding: 20px 0;
-        }
-    </style>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-LN+7fdVzj6u52u30Kp6M/trliBMCMKTyK833zpbD+pXdCLuTusPj697FH4R/5mcr" crossorigin="anonymous">
     @stack('styles')
 </head>
 <body>
-    <div class="container">
-        <h2>Dashboard</h2>
-        <nav>
-            <a href="{{ route('dashboard') }}">Home</a>
-            <a href="{{ route('publisher.index') }}">Publisher</a>
-            <a href="{{ route('member.index') }}">Member</a>
-            <a href="{{ route('category.index') }}">Category</a>
-            <a href="{{ route('book.index') }}">Book</a>
-            <a href="{{ route('borrowing.index') }}">Borrowing</a>
-        </nav>
-        <hr>
-        <div class="content">
-            @yield('content')
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="{{ route('dashboard') }}">Perpustakaan</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="{{ route('dashboard') }}">Beranda</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ route('publisher.index') }}">Publisher</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ route('member.index') }}">Member</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ route('category.index') }}">Kategori</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ route('book.index') }}">Buku</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ route('borrowing.index') }}">Peminjaman</a></li>
+                </ul>
+            </div>
         </div>
+    </nav>
+    <div class="container mt-4">
+        @yield('content')
     </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js" integrity="sha384-ndDqU0Gzau9qJ1lfW4pNLlhNTkCfHzAVBReH9diLvGRem5+R9g2FzA8ZGN954O5Q" crossorigin="anonymous"></script>
 </body>
 </html>
