@@ -1,122 +1,103 @@
 @extends('layout')
 
 @section('content')
-    <div class="form-container">
-        <h2 class="form-title">Tambah Peminjaman</h2>
+    <div class="container">
+        {{-- Alert --}}
+        @if (session('error'))
+            <div class="alert alert-danger">{{ session('error') }}</div>
+        @endif
+        @if (session('success'))
+            <div class="alert alert-success">{{ session('success') }}</div>
+        @endif
 
-        <form action="{{ route('borrowing.store') }}" method="POST" class="styled-form">
-            @csrf
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">Form Tambah Peminjaman</h5>
+                    </div>
+                    <div class="card-body">
+                        <form action="{{ route('borrowing.store') }}" method="POST">
+                            @csrf
 
-            {{-- Pilih Member --}}
-            <label for="member_id">Member:</label>
-            <select name="member_id" required>
-                <option value="">-- Pilih Member --</option>
-                @foreach ($members as $member)
-                    <option value="{{ $member->id }}">{{ $member->name }}</option>
-                @endforeach
-            </select>
+                            {{-- Pilih Member --}}
+                            <div class="mb-3">
+                                <label for="member_id" class="form-label">Member <span class="text-danger">*</span></label>
+                                <select name="member_id" id="member_id" class="form-select" required>
+                                    <option value="">-- Pilih Member --</option>
+                                    @foreach ($members as $member)
+                                        <option value="{{ $member->id }}" {{ old('member_id') == $member->id ? 'selected' : '' }}>
+                                            {{ $member->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                @error('member_id')
+                                    <div class="text-danger small">{{ $message }}</div>
+                                @enderror
+                            </div>
 
-            {{-- Pilih Buku --}}
-            <label for="book_id">Buku:</label>
-            <select name="book_id" required>
-                <option value="">-- Pilih Buku --</option>
-                @foreach ($books as $book)
-                    <option value="{{ $book->id }}">{{ $book->title }}</option>
-                @endforeach
-            </select>
+                            {{-- Pilih Buku --}}
+                            <div class="mb-3">
+                                <label for="book_id" class="form-label">Buku <span class="text-danger">*</span></label>
+                                <select name="book_id" id="book_id" class="form-select" required>
+                                    <option value="">-- Pilih Buku --</option>
+                                    @foreach ($books as $book)
+                                        <option value="{{ $book->id }}" {{ old('book_id') == $book->id ? 'selected' : '' }}>
+                                            {{ $book->title }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                @error('book_id')
+                                    <div class="text-danger small">{{ $message }}</div>
+                                @enderror
+                            </div>
 
-            {{-- Tanggal Pinjam --}}
-            <label for="borrowed">Tanggal Pinjam:</label>
-            <input type="date" name="borrowed" required>
+                            {{-- Tanggal Pinjam --}}
+                            <div class="mb-3">
+                                <label for="borrowed" class="form-label">Tanggal Pinjam <span class="text-danger">*</span></label>
+                                <input type="date" name="borrowed" id="borrowed" class="form-control" 
+                                       value="{{ old('borrowed') }}" required>
+                                @error('borrowed')
+                                    <div class="text-danger small">{{ $message }}</div>
+                                @enderror
+                            </div>
 
-            {{-- Tanggal Kembali --}}
-            <label for="returned">Tanggal Kembali:</label>
-            <input type="date" name="returned">
+                            {{-- Tanggal Kembali --}}
+                            <div class="mb-3">
+                                <label for="returned" class="form-label">Tanggal Kembali</label>
+                                <input type="date" name="returned" id="returned" class="form-control" 
+                                       value="{{ old('returned') }}">
+                                <div class="form-text">Kosongkan jika belum dikembalikan</div>
+                                @error('returned')
+                                    <div class="text-danger small">{{ $message }}</div>
+                                @enderror
+                            </div>
 
-            {{-- Status --}}
-            <label for="status">Status:</label>
-            <select name="status" required>
-                <option value="borrowed">Dipinjam</option>
-                <option value="returned">Dikembalikan</option>
-            </select>
+                            {{-- Status --}}
+                            <div class="mb-3">
+                                <label for="status" class="form-label">Status <span class="text-danger">*</span></label>
+                                <select name="status" id="status" class="form-select" required>
+                                    <option value="borrowed" {{ old('status') == 'borrowed' ? 'selected' : '' }}>Dipinjam</option>
+                                    <option value="returned" {{ old('status') == 'returned' ? 'selected' : '' }}>Dikembalikan</option>
+                                </select>
+                                @error('status')
+                                    <div class="text-danger small">{{ $message }}</div>
+                                @enderror
+                            </div>
 
-            <div class="form-actions">
-                <button type="submit">Simpan</button>
-                <a href="{{ route('borrowing.index') }}">Kembali</a>
+                            {{-- Form Actions --}}
+                            <div class="d-flex justify-content-between">
+                                <a href="{{ route('borrowing.index') }}" class="btn btn-secondary">
+                                    <i class="fas fa-arrow-left me-1"></i> Kembali
+                                </a>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save me-1"></i> Simpan
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
             </div>
-        </form>
+        </div>
     </div>
 @endsection
-
-@push('styles')
-    <style>
-        body {
-            background-color: #ffffff;
-            color: #212121;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0;
-            padding: 0;
-        }
-
-        .form-container {
-            max-width: 600px;
-            margin: 40px auto;
-            padding: 30px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            background-color: #f9f9f9;
-            box-shadow: 0 0 10px rgba(0,0,0,0.05);
-        }
-
-        .form-title {
-            text-align: center;
-            font-size: 2rem;
-            margin-bottom: 20px;
-            color: #0d47a1; /* dark blue accent */
-        }
-
-        .styled-form label {
-            display: block;
-            margin: 10px 0 5px;
-            font-weight: 600;
-        }
-
-        .styled-form input,
-        .styled-form select {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #bbb;
-            border-radius: 5px;
-            margin-bottom: 15px;
-            font-size: 1rem;
-        }
-
-        .form-actions {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .form-actions button {
-            background-color: #0d47a1;
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-
-        .form-actions button:hover {
-            background-color: #1565c0;
-        }
-
-        .form-actions a {
-            color: #0d47a1;
-            text-decoration: none;
-        }
-
-        .form-actions a:hover {
-            text-decoration: underline;
-        }
-    </style>
-@endpush

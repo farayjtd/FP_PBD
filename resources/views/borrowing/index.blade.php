@@ -1,41 +1,37 @@
 @extends('layout')
-@if (session('success'))
-    <div style="background-color: #d4edda; padding: 10px; border: 1px solid #c3e6cb; margin: 10px 0;">
-        {{ session('success') }}
-    </div>
-@endif
-
-@if (session('error'))
-    <div style="background-color: #f8d7da; padding: 10px; border: 1px solid #f5c6cb; margin: 10px 0;">
-        {{ session('error') }}
-    </div>
-@endif
 
 @section('content')
     <div class="container">
-        <h3 class="title">Daftar Peminjaman</h3>
-        <a href="{{ route('borrowing.create') }}" class="btn-primary">+ Tambah Peminjaman</a>
+        <h3 class="text-primary mb-3">Daftar Peminjaman</h3>
 
-        {{-- Search dan Filter --}}
-        <form method="GET" action="{{ route('borrowing.index') }}" style="margin: 15px 0;">
-            <input type="text" name="search" placeholder="Cari nama atau judul buku..." 
-                   value="{{ request('search') }}" 
-                   onkeydown="if(event.key === 'Enter') this.form.submit();" 
-                   style="padding: 8px; width: 300px;">
+        {{-- Alert --}}
+        @if (session('error'))
+            <div class="alert alert-danger">{{ session('error') }}</div>
+        @endif
+        @if (session('success'))
+            <div class="alert alert-success">{{ session('success') }}</div>
+        @endif
 
-            <select name="status" onchange="this.form.submit()" style="padding: 8px;">
-                <option value="">Semua Status</option>
-                <option value="borrowed" {{ request('status') == 'borrowed' ? 'selected' : '' }}>Dipinjam</option>
-                <option value="returned" {{ request('status') == 'returned' ? 'selected' : '' }}>Dikembalikan</option>
-            </select>
-        </form>
+        {{-- Add Button & Search --}}
+        <div class="d-flex justify-content-between mb-3">
+            <a href="{{ route('borrowing.create') }}" class="btn btn-primary">+ Tambah Peminjaman</a>
 
-        {{-- Tampilkan jika kosong --}}
-        @if($borrowings->isEmpty())
-            <p style="color: gray;">Data peminjaman tidak ditemukan.</p>
-        @else
-            <table class="styled-table">
-                <thead>
+            <form method="GET" action="{{ route('borrowing.index') }}" class="d-flex">
+                <input type="text" name="search" placeholder="Cari nama atau judul buku..." 
+                       value="{{ request('search') }}" class="form-control me-2">
+                <select name="status" class="form-select me-2" onchange="this.form.submit()">
+                    <option value="">Semua Status</option>
+                    <option value="borrowed" {{ request('status') == 'borrowed' ? 'selected' : '' }}>Dipinjam</option>
+                    <option value="returned" {{ request('status') == 'returned' ? 'selected' : '' }}>Dikembalikan</option>
+                </select>
+                <button class="btn btn-outline-primary" type="submit">Cari</button>
+            </form>
+        </div>
+
+        {{-- Borrowing Table --}}
+        <div class="table-responsive">
+            <table class="table table-bordered table-striped align-middle">
+                <thead class="table-primary text-center">
                     <tr>
                         <th>No</th>
                         <th>Member</th>
@@ -47,217 +43,123 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach($borrowings as $borrowing)
-                        <tr>
-                            <td>{{ $loop->iteration }}</td>
+                    @forelse($borrowings as $index => $borrowing)
+                        <tr class="text-center">
+                            <td>{{ $index + 1 }}</td>
                             <td>{{ $borrowing->member->name ?? 'N/A' }}</td>
                             <td>{{ $borrowing->book->title ?? 'N/A' }}</td>
                             <td>{{ $borrowing->borrowed }}</td>
                             <td>{{ $borrowing->returned ?? '-' }}</td>
-                            <td>{{ ucfirst($borrowing->status) }}</td>
                             <td>
-                                <button class="btn-secondary" onclick="showDetail({{ $borrowing->id }})">Detail</button>
-                                <button class="btn-secondary" onclick="showEdit({{ $borrowing->id }})">Edit</button>
-                                <form action="{{ route('borrowing.destroy', $borrowing->id) }}" method="POST" style="display:inline;">
+                                <span class="badge {{ $borrowing->status == 'returned' ? 'bg-success' : 'bg-warning' }}">
+                                    {{ ucfirst($borrowing->status) }}
+                                </span>
+                            </td>
+                            <td>
+                                <button class="btn btn-sm btn-info me-1" data-bs-toggle="modal" 
+                                        data-bs-target="#detailModal{{ $borrowing->id }}">Detail</button>
+                                <button class="btn btn-sm btn-warning me-1" data-bs-toggle="modal" 
+                                        data-bs-target="#editModal{{ $borrowing->id }}">Edit</button>
+                                <form action="{{ route('borrowing.destroy', $borrowing->id) }}" method="POST" 
+                                      style="display:inline-block;" onsubmit="return confirm('Yakin hapus?')">
                                     @csrf
                                     @method('DELETE')
-                                    <button class="btn-danger" onclick="return confirm('Yakin hapus?')">Hapus</button>
+                                    <button class="btn btn-sm btn-danger">Hapus</button>
                                 </form>
                             </td>
                         </tr>
 
-                        {{-- Modal Detail --}}
-                        <div id="detail-modal-{{ $borrowing->id }}" class="modal">
-                            <div class="modal-content">
-                                <h4>Detail Peminjaman</h4>
-                                <p><strong>Member:</strong> {{ $borrowing->member->name ?? '-' }}</p>
-                                <p><strong>Buku:</strong> {{ $borrowing->book->title ?? '-' }}</p>
-                                <p><strong>Dipinjam:</strong> {{ $borrowing->borrowed }}</p>
-                                <p><strong>Dikembalikan:</strong> {{ $borrowing->returned ?? '-' }}</p>
-                                <p><strong>Status:</strong> {{ ucfirst($borrowing->status) }}</p>
-                                <p><strong>Dibuat:</strong> {{ $borrowing->created_at }}</p>
-                                <p><strong>Update Terakhir:</strong> {{ $borrowing->updated_at }}</p>
-                                <button class="btn-secondary" onclick="hideDetail({{ $borrowing->id }})">Tutup</button>
+                        {{-- Detail Modal --}}
+                        <div class="modal fade" id="detailModal{{ $borrowing->id }}" tabindex="-1" 
+                             aria-labelledby="detailLabel{{ $borrowing->id }}" aria-hidden="true">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header bg-info text-white">
+                                        <h5 class="modal-title" id="detailLabel{{ $borrowing->id }}">Detail Peminjaman</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <p><strong>Member:</strong> {{ $borrowing->member->name ?? '-' }}</p>
+                                        <p><strong>Buku:</strong> {{ $borrowing->book->title ?? '-' }}</p>
+                                        <p><strong>Dipinjam:</strong> {{ $borrowing->borrowed }}</p>
+                                        <p><strong>Dikembalikan:</strong> {{ $borrowing->returned ?? '-' }}</p>
+                                        <p><strong>Status:</strong> {{ ucfirst($borrowing->status) }}</p>
+                                        <p><strong>Dibuat:</strong> {{ $borrowing->created_at }}</p>
+                                        <p><strong>Update Terakhir:</strong> {{ $borrowing->updated_at }}</p>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
-                        {{-- Modal Edit --}}
-                        <div id="edit-modal-{{ $borrowing->id }}" class="modal">
-                            <div class="modal-content">
-                                <h4>Edit Peminjaman</h4>
-                                <form action="{{ route('borrowing.update', $borrowing->id) }}" method="POST">
-                                    @csrf
-                                    @method('PUT')
-
-                                    <label>Member:</label>
-                                    <select name="member_id" required>
-                                        @foreach ($members as $member)
-                                            <option value="{{ $member->id }}" 
-                                                {{ $borrowing->member_id == $member->id ? 'selected' : '' }}>
-                                                {{ $member->name }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-
-                                    <label>Buku:</label>
-                                    <select name="book_id" required>
-                                        @foreach ($books as $book)
-                                            <option value="{{ $book->id }}" 
-                                                {{ $borrowing->book_id == $book->id ? 'selected' : '' }}>
-                                                {{ $book->title }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-
-                                    <label>Tanggal Pinjam:</label>
-                                    <input type="date" name="borrowed" value="{{ $borrowing->borrowed }}">
-
-                                    <label>Tanggal Kembali:</label>
-                                    <input type="date" name="returned" value="{{ $borrowing->returned }}">
-
-                                    <label>Status:</label>
-                                    <select name="status">
-                                        <option value="borrowed" {{ $borrowing->status == 'borrowed' ? 'selected' : '' }}>Dipinjam</option>
-                                        <option value="returned" {{ $borrowing->status == 'returned' ? 'selected' : '' }}>Dikembalikan</option>
-                                    </select>
-
-                                    <button class="btn-primary" type="submit">Update</button>
-                                    <button class="btn-secondary" type="button" onclick="hideEdit({{ $borrowing->id }})">Batal</button>
-                                </form>
+                        {{-- Edit Modal --}}
+                        <div class="modal fade" id="editModal{{ $borrowing->id }}" tabindex="-1" 
+                             aria-labelledby="editLabel{{ $borrowing->id }}" aria-hidden="true">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <form action="{{ route('borrowing.update', $borrowing->id) }}" method="POST" class="modal-content">
+                                        @csrf
+                                        @method('PUT')
+                                        <div class="modal-header bg-warning">
+                                            <h5 class="modal-title" id="editLabel{{ $borrowing->id }}">Edit Peminjaman</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <div class="mb-2">
+                                                <label class="form-label">Member</label>
+                                                <select name="member_id" class="form-control" required>
+                                                    @foreach ($members as $member)
+                                                        <option value="{{ $member->id }}" 
+                                                            {{ $borrowing->member_id == $member->id ? 'selected' : '' }}>
+                                                            {{ $member->name }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                            <div class="mb-2">
+                                                <label class="form-label">Buku</label>
+                                                <select name="book_id" class="form-control" required>
+                                                    @foreach ($books as $book)
+                                                        <option value="{{ $book->id }}" 
+                                                            {{ $borrowing->book_id == $book->id ? 'selected' : '' }}>
+                                                            {{ $book->title }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                            <div class="mb-2">
+                                                <label class="form-label">Tanggal Pinjam</label>
+                                                <input type="date" name="borrowed" value="{{ $borrowing->borrowed }}" class="form-control">
+                                            </div>
+                                            <div class="mb-2">
+                                                <label class="form-label">Tanggal Kembali</label>
+                                                <input type="date" name="returned" value="{{ $borrowing->returned }}" class="form-control">
+                                            </div>
+                                            <div class="mb-2">
+                                                <label class="form-label">Status</label>
+                                                <select name="status" class="form-control">
+                                                    <option value="borrowed" {{ $borrowing->status == 'borrowed' ? 'selected' : '' }}>Dipinjam</option>
+                                                    <option value="returned" {{ $borrowing->status == 'returned' ? 'selected' : '' }}>Dikembalikan</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="submit" class="btn btn-warning">Perbarui</button>
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                                        </div>
+                                    </form>
+                                </div>
                             </div>
                         </div>
-                    @endforeach
+                    @empty
+                        <tr>
+                            <td colspan="7" class="text-center text-danger">Data peminjaman tidak ditemukan.</td>
+                        </tr>
+                    @endforelse
                 </tbody>
             </table>
-        @endif
+        </div>
     </div>
-
-    <script>
-        function showDetail(id) {
-            document.getElementById('detail-modal-' + id).style.display = 'block';
-        }
-
-        function hideDetail(id) {
-            document.getElementById('detail-modal-' + id).style.display = 'none';
-        }
-
-        function showEdit(id) {
-            document.getElementById('edit-modal-' + id).style.display = 'block';
-        }
-
-        function hideEdit(id) {
-            document.getElementById('edit-modal-' + id).style.display = 'none';
-        }
-    </script>
 @endsection
-
-@push('styles')
-    <style>
-        body {
-            background: #fff;
-            font-family: Arial, sans-serif;
-        }
-
-        .container {
-            padding: 30px;
-            max-width: 1000px;
-            margin: auto;
-        }
-
-        .title {
-            font-size: 24px;
-            margin-bottom: 15px;
-            color: #0d47a1;
-        }
-
-        .btn-primary,
-        .btn-secondary,
-        .btn-danger {
-            display: inline-block;
-            padding: 6px 12px;
-            margin-right: 5px;
-            border: none;
-            border-radius: 4px;
-            text-decoration: none;
-            cursor: pointer;
-            font-size: 14px;
-        }
-
-        .btn-primary {
-            background-color: #0d47a1;
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background-color: #1565c0;
-        }
-
-        .btn-secondary {
-            background-color: #e3f2fd;
-            color: #0d47a1;
-        }
-
-        .btn-secondary:hover {
-            background-color: #bbdefb;
-        }
-
-        .btn-danger {
-            background-color: #c62828;
-            color: white;
-        }
-
-        .btn-danger:hover {
-            background-color: #b71c1c;
-        }
-
-        .styled-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 15px;
-        }
-
-        .styled-table th,
-        .styled-table td {
-            border: 1px solid #ddd;
-            padding: 10px;
-            text-align: left;
-        }
-
-        .styled-table th {
-            background-color: #0d47a1;
-            color: white;
-        }
-
-        .modal {
-            display: none;
-            position: fixed;
-            top: 10%;
-            left: 50%;
-            transform: translateX(-50%);
-            background: #fff;
-            border: 1px solid #ccc;
-            padding: 25px;
-            z-index: 999;
-            width: 400px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.2);
-        }
-
-        .modal-content label {
-            font-weight: bold;
-            margin-top: 10px;
-            display: block;
-        }
-
-        .modal-content input,
-        .modal-content select {
-            width: 100%;
-            padding: 7px;
-            margin-bottom: 10px;
-        }
-
-        .modal-content h4 {
-            margin-top: 0;
-            color: #0d47a1;
-        }
-    </style>
-@endpush
