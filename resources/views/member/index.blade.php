@@ -1,118 +1,142 @@
 @extends('layout')
-@if (session('success'))
-    <div style="background-color: #d4edda; color: #155724; padding: 10px; margin-bottom: 15px; border-radius: 5px;">
-        {{ session('success') }}
-    </div>
-@endif
-
-@if (session('error'))
-    <div style="background-color: #f8d7da; color: #721c24; padding: 10px; margin-bottom: 15px; border-radius: 5px;">
-        {{ session('error') }}
-    </div>
-@endif
 
 @section('content')
-    <h3>Member List</h3>
-    <a href="{{ route('member.create') }}">+ Add New Member</a>
+    <div class="container">
+        <h3 class="text-primary mb-3">Member List</h3>
 
-    {{-- Search & Filter Form --}}
-    <form method="GET" action="{{ route('member.index') }}" style="margin: 15px 0;">
-        <input type="text" name="search" placeholder="Search member..." value="{{ request('search') }}"
-               style="padding: 6px; width: 200px;" onkeydown="if(event.key === 'Enter') this.form.submit();">
+        {{-- Alert --}}
+        @if (session('error'))
+            <div class="alert alert-danger">{{ session('error') }}</div>
+        @endif
+        @if (session('success'))
+            <div class="alert alert-success">{{ session('success') }}</div>
+        @endif
 
-        <select name="filter" onchange="this.form.submit()" style="padding: 6px;">
-            <option value="">-- All Status & Order --</option>
-            <option value="active_oldest" {{ request('filter') == 'active_oldest' ? 'selected' : '' }}>Active - Oldest</option>
-            <option value="active_newest" {{ request('filter') == 'active_newest' ? 'selected' : '' }}>Active - Newest</option>
-            <option value="inactive_oldest" {{ request('filter') == 'inactive_oldest' ? 'selected' : '' }}>Inactive - Oldest</option>
-            <option value="inactive_newest" {{ request('filter') == 'inactive_newest' ? 'selected' : '' }}>Inactive - Newest</option>
-        </select>
-    </form>
+        {{-- Add Button & Search --}}
+        <div class="d-flex justify-content-between mb-3">
+            <a href="{{ route('member.create') }}" class="btn btn-primary">+ Add New Member</a>
 
-    @if($members->count())
-        <table border="1" cellpadding="5">
-            <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>email</th>
-                    <th>Phone</th>
-                    <th>sts</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach($members as $member)
+            <form method="GET" action="{{ route('member.index') }}" class="d-flex">
+                <input type="text" name="search" placeholder="Search..." class="form-control me-2"
+                    value="{{ request('search') }}">
+                <select name="filter" class="form-select me-2" onchange="this.form.submit()">
+                    <option value="">-- All Status & Order --</option>
+                    <option value="active_oldest" {{ request('filter') == 'active_oldest' ? 'selected' : '' }}>Active - Oldest</option>
+                    <option value="active_newest" {{ request('filter') == 'active_newest' ? 'selected' : '' }}>Active - Newest</option>
+                    <option value="inactive_oldest" {{ request('filter') == 'inactive_oldest' ? 'selected' : '' }}>Inactive - Oldest</option>
+                    <option value="inactive_newest" {{ request('filter') == 'inactive_newest' ? 'selected' : '' }}>Inactive - Newest</option>
+                </select>
+                <button class="btn btn-outline-primary" type="submit">Search</button>
+            </form>
+        </div>
+
+        {{-- Member Table --}}
+        <div class="table-responsive">
+            <table class="table table-bordered table-striped align-middle">
+                <thead class="table-primary text-center">
                     <tr>
-                        <td>{{ $member->name }}</td>
-                        <td>{{ $member->email }}</td>
-                        <td>{{ $member->phone }}</td>
-                        <td>{{ $member->status }}</td>
-                        <td>
-                            <button onclick="showDetail({{ $member->id }})">Detail</button>
-                            <button onclick="showEdit({{ $member->id }})">Edit</button>
-                            <form action="{{ route('member.destroy', $member->id) }}" method="POST" style="display:inline;">
-                                @csrf
-                                @method('DELETE')
-                                <button onclick="return confirm('Are you sure?')">Delete</button>
-                            </form>
-                        </td>
+                        <th>No</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th>Status</th>
+                        <th>Action</th>
                     </tr>
+                </thead>
+                <tbody>
+                    @forelse ($members as $index => $member)
+                        <tr class="text-center">
+                            <td>{{ $index + 1 }}</td>
+                            <td>{{ $member->name }}</td>
+                            <td>{{ $member->email }}</td>
+                            <td>{{ $member->phone }}</td>
+                            <td>
+                                <span class="badge {{ $member->status == 'active' ? 'bg-success' : 'bg-secondary' }}">
+                                    {{ ucfirst($member->status) }}
+                                </span>
+                            </td>
+                            <td>
+                                <button class="btn btn-sm btn-info me-1" data-bs-toggle="modal"
+                                    data-bs-target="#detailModal{{ $member->id }}">Detail</button>
 
-                    {{-- Detail Modal --}}
-                    <div id="detail-modal-{{ $member->id }}" style="display:none; position:fixed; top:20%; left:30%; background:white; padding:20px; border:1px solid black; z-index:1000;">
-                        <h4>Member Detail</h4>
-                        <p><strong>Name:</strong> {{ $member->name }}</p>
-                        <p><strong>email:</strong> {{ $member->email }}</p>
-                        <p><strong>Phone:</strong> {{ $member->phone }}</p>
-                        <p><strong>Address:</strong> {{ $member->address }}</p>
-                        <p><strong>joined:</strong> {{ $member->joined }}</p>
-                        <p><strong>sts:</strong> {{ $member->status }}</p>
-                        <button onclick="hideDetail({{ $member->id }})">Close</button>
-                    </div>
+                                <button class="btn btn-sm btn-warning me-1" data-bs-toggle="modal"
+                                    data-bs-target="#editModal{{ $member->id }}">Edit</button>
 
-                    {{-- Edit Modal --}}
-                    <div id="edit-modal-{{ $member->id }}" style="display:none; position:fixed; top:20%; left:30%; background:white; padding:20px; border:1px solid black; z-index:1000;">
-                        <h4>Edit Member</h4>
-                        <form action="{{ route('member.update', $member->id) }}" method="POST">
-                            @csrf
-                            @method('PUT')
+                                <form action="{{ route('member.destroy', $member->id) }}" method="POST"
+                                    style="display:inline-block;" onsubmit="return confirm('Are you sure?')">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button class="btn btn-sm btn-danger">Delete</button>
+                                </form>
+                            </td>
+                        </tr>
 
-                            <p><strong>Name:</strong> <input type="text" name="name" value="{{ $member->name }}"></p>
-                            <p><strong>Email:</strong> <input type="email" name="email" value="{{ $member->email }}"></p>
-                            <p><strong>Phone:</strong> <input type="text" name="phone" value="{{ $member->phone }}"></p>
-                            <p><strong>Address:</strong> <input type="text" name="address" value="{{ $member->address }}"></p>
-                            <p><strong>Joined:</strong> <input type="date" name="joined" value="{{ $member->joined }}"></p>
-                            <p><strong>Status:</strong>
-                                <select name="status">
-                                    <option value="active" {{ $member->status == 'active' ? 'selected' : '' }}>Active</option>
-                                    <option value="inactive" {{ $member->status == 'inactive' ? 'selected' : '' }}>Inactive</option>
-                                </select>
-                            </p>
+                        {{-- Detail Modal --}}
+                        <div class="modal fade" id="detailModal{{ $member->id }}" tabindex="-1" aria-labelledby="detailLabel{{ $member->id }}" aria-hidden="true">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header bg-primary text-white">
+                                        <h5 class="modal-title" id="detailLabel{{ $member->id }}">Member Detail</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <p><strong>Name:</strong> {{ $member->name }}</p>
+                                        <p><strong>Email:</strong> {{ $member->email }}</p>
+                                        <p><strong>Phone:</strong> {{ $member->phone }}</p>
+                                        <p><strong>Status:</strong> {{ ucfirst($member->status) }}</p>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
 
-                            <button type="submit">Update</button>
-                            <button type="button" onclick="hideEdit({{ $member->id }})">Cancel</button>
-                        </form>
-                    </div>
-                @endforeach
-            </tbody>
-        </table>
-    @else
-        <p><strong>No members found.</strong></p>
-    @endif
-
-    {{-- Scripts --}}
-    <script>
-        function showDetail(id) {
-            document.getElementById('detail-modal-' + id).style.display = 'block';
-        }
-        function hideDetail(id) {
-            document.getElementById('detail-modal-' + id).style.display = 'none';
-        }
-        function showEdit(id) {
-            document.getElementById('edit-modal-' + id).style.display = 'block';
-        }
-        function hideEdit(id) {
-            document.getElementById('edit-modal-' + id).style.display = 'none';
-        }
-    </script>
+                        {{-- Edit Modal --}}
+                        <div class="modal fade" id="editModal{{ $member->id }}" tabindex="-1" aria-labelledby="editLabel{{ $member->id }}" aria-hidden="true">
+                            <div class="modal-dialog">
+                                <form action="{{ route('member.update', $member->id) }}" method="POST" class="modal-content">
+                                    @csrf
+                                    @method('PUT')
+                                    <div class="modal-header bg-warning">
+                                        <h5 class="modal-title" id="editLabel{{ $member->id }}">Edit Member</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <div class="mb-2">
+                                            <label>Name</label>
+                                            <input type="text" name="name" value="{{ $member->name }}" class="form-control" required>
+                                        </div>
+                                        <div class="mb-2">
+                                            <label>Email</label>
+                                            <input type="email" name="email" value="{{ $member->email }}" class="form-control">
+                                        </div>
+                                        <div class="mb-2">
+                                            <label>Phone</label>
+                                            <input type="text" name="phone" value="{{ $member->phone }}" class="form-control">
+                                        </div>
+                                        <div class="mb-2">
+                                            <label>Status</label>
+                                            <select name="status" class="form-control">
+                                                <option value="active" {{ $member->status == 'active' ? 'selected' : '' }}>Active</option>
+                                                <option value="inactive" {{ $member->status == 'inactive' ? 'selected' : '' }}>Inactive</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="submit" class="btn btn-warning">Update</button>
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    @empty
+                        <tr>
+                            <td colspan="6" class="text-center text-danger">Data member tidak ditemukan.</td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+    </div>
 @endsection
