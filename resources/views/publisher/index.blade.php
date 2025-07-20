@@ -1,100 +1,126 @@
 @extends('layout')
 
-@if (session('error'))
-    <div style="background-color: #f8d7da; color: #721c24; padding: 10px; border: 1px solid #f5c6cb; margin-bottom: 15px;">
-        {{ session('error') }}
-    </div>
-@endif
-
-@if (session('success'))
-    <div style="background-color: #d4edda; color: #155724; padding: 10px; border: 1px solid #c3e6cb; margin-bottom: 15px;">
-        {{ session('success') }}
-    </div>
-@endif
-
-
 @section('content')
-    <h3 style="color: #003366;">Publisher List</h3>
-    <a href="{{ route('publisher.create') }}" style="color: white; background-color: #003366; padding: 5px 10px; text-decoration: none; border-radius: 4px;">+ Add New Publisher</a>
+    <div class="container">
+        <h3 class="text-primary mb-3">Publisher List</h3>
 
-    <form method="GET" action="{{ route('publisher.index') }}" style="margin-top: 10px;">
-        <input type="text" name="search" placeholder="Search..." value="{{ request('search') }}">
-    </form>
+        {{-- Alert --}}
+        @if (session('error'))
+            <div class="alert alert-danger">{{ session('error') }}</div>
+        @endif
+        @if (session('success'))
+            <div class="alert alert-success">{{ session('success') }}</div>
+        @endif
 
-    <table border="1" cellpadding="10" cellspacing="0" style="width: 100%; margin-top: 15px; background-color: white; border-collapse: collapse;">
-        <thead style="background-color: #003366; color: white;">
-            <tr>
-                <th>No</th>
-                <th>Name</th>
-                <th>Phone</th>
-                <th>Email</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            @if ($publishers->count() > 0)
-                @foreach($publishers as $index => $publisher)
+        {{-- Add Button & Search --}}
+        <div class="d-flex justify-content-between mb-3">
+            <a href="{{ route('publisher.create') }}" class="btn btn-primary">+ Add New Publisher</a>
+
+            <form method="GET" action="{{ route('publisher.index') }}" class="d-flex">
+                <input type="text" name="search" placeholder="Search..." class="form-control me-2"
+                    value="{{ request('search') }}">
+                <button class="btn btn-outline-primary" type="submit">Search</button>
+            </form>
+        </div>
+
+        {{-- Publisher Table --}}
+        <div class="table-responsive">
+            <table class="table table-bordered table-striped align-middle">
+                <thead class="table-primary text-center">
                     <tr>
-                        <td>{{ $index + 1 }}</td>
-                        <td>{{ $publisher->name }}</td>
-                        <td>{{ $publisher->phone }}</td>
-                        <td>{{ $publisher->email }}</td>
-                        <td>
-                            <button style="background-color: #003366; color: white;" onclick="showDetail({{ $publisher->id }})">Detail</button>
-                            <button style="background-color: #003366; color: white;" onclick="showEdit({{ $publisher->id }})">Edit</button>
-                            <form action="{{ route('publisher.destroy', $publisher->id) }}" method="POST" style="display:inline;">
-                                @csrf
-                                @method('DELETE')
-                                <button onclick="return confirm('Are you sure?')" style="background-color: darkred; color: white;">Delete</button>
-                            </form>
-                        </td>
+                        <th>No</th>
+                        <th>Name</th>
+                        <th>Phone</th>
+                        <th>Email</th>
+                        <th>Actions</th>
                     </tr>
+                </thead>
+                <tbody>
+                    @forelse ($publishers as $index => $publisher)
+                        <tr>
+                            <td>{{ $index + 1 }}</td>
+                            <td>{{ $publisher->name }}</td>
+                            <td>{{ $publisher->phone }}</td>
+                            <td>{{ $publisher->email }}</td>
+                            <td>
+                                <button class="btn btn-sm btn-info me-1" data-bs-toggle="modal"
+                                    data-bs-target="#detailModal{{ $publisher->id }}">Detail</button>
 
-                    <!-- Detail Modal -->
-                    <div id="detail-modal-{{ $publisher->id }}" style="display:none; position:fixed; top:15%; left:30%; background:white; padding:20px; border:2px solid #003366; width:400px;">
-                        <h4 style="color:#003366;">Publisher Detail</h4>
-                        <p><strong>Name:</strong> {{ $publisher->name }}</p>
-                        <p><strong>Address:</strong> {{ $publisher->address }}</p>
-                        <p><strong>Phone:</strong> {{ $publisher->phone }}</p>
-                        <p><strong>Email:</strong> {{ $publisher->email }}</p>
-                        <button onclick="hideDetail({{ $publisher->id }})" style="background-color: #003366; color: white;">Close</button>
-                    </div>
+                                <button class="btn btn-sm btn-warning me-1" data-bs-toggle="modal"
+                                    data-bs-target="#editModal{{ $publisher->id }}">Edit</button>
 
-                    <!-- Edit Modal -->
-                    <div id="edit-modal-{{ $publisher->id }}" style="display:none; position:fixed; top:10%; left:30%; background:white; padding:20px; border:2px solid #003366; width:400px;">
-                        <h4 style="color:#003366;">Edit Publisher</h4>
-                        <form action="{{ route('publisher.update', $publisher->id) }}" method="POST">
-                            @csrf
-                            @method('PUT')
-                            <p>Name:<br><input type="text" name="name" value="{{ $publisher->name }}" style="width:100%;"></p>
-                            <p>Address:<br><input type="text" name="address" value="{{ $publisher->address }}" style="width:100%;"></p>
-                            <p>Phone:<br><input type="text" name="phone" value="{{ $publisher->phone }}" style="width:100%;"></p>
-                            <p>Email:<br><input type="email" name="email" value="{{ $publisher->email }}" style="width:100%;"></p>
-                            <button type="submit" style="background-color: #003366; color: white;">Update</button>
-                            <button type="button" onclick="hideEdit({{ $publisher->id }})">Cancel</button>
-                        </form>
-                    </div>
-                @endforeach
-            @else
-                <tr>
-                    <td colspan="5" style="text-align:center; color: red;">Data publisher tidak ditemukan.</td>
-                </tr>
-            @endif
-        </tbody>
-    </table>
+                                <form action="{{ route('publisher.destroy', $publisher->id) }}" method="POST"
+                                    style="display:inline-block;" onsubmit="return confirm('Are you sure?')">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button class="btn btn-sm btn-danger">Delete</button>
+                                </form>
+                            </td>
+                        </tr>
 
-    <script>
-        function showDetail(id) {
-            document.getElementById('detail-modal-' + id).style.display = 'block';
-        }
-        function hideDetail(id) {
-            document.getElementById('detail-modal-' + id).style.display = 'none';
-        }
-        function showEdit(id) {
-            document.getElementById('edit-modal-' + id).style.display = 'block';
-        }
-        function hideEdit(id) {
-            document.getElementById('edit-modal-' + id).style.display = 'none';
-        }
-    </script>
+                        {{-- Detail Modal --}}
+                        <div class="modal fade" id="detailModal{{ $publisher->id }}" tabindex="-1" aria-labelledby="detailLabel{{ $publisher->id }}" aria-hidden="true">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header bg-primary text-white">
+                                        <h5 class="modal-title" id="detailLabel{{ $publisher->id }}">Publisher Detail</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <p><strong>Name:</strong> {{ $publisher->name }}</p>
+                                        <p><strong>Address:</strong> {{ $publisher->address }}</p>
+                                        <p><strong>Phone:</strong> {{ $publisher->phone }}</p>
+                                        <p><strong>Email:</strong> {{ $publisher->email }}</p>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {{-- Edit Modal --}}
+                        <div class="modal fade" id="editModal{{ $publisher->id }}" tabindex="-1" aria-labelledby="editLabel{{ $publisher->id }}" aria-hidden="true">
+                            <div class="modal-dialog">
+                                <form action="{{ route('publisher.update', $publisher->id) }}" method="POST" class="modal-content">
+                                    @csrf
+                                    @method('PUT')
+                                    <div class="modal-header bg-warning">
+                                        <h5 class="modal-title" id="editLabel{{ $publisher->id }}">Edit Publisher</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <div class="mb-2">
+                                            <label>Name</label>
+                                            <input type="text" name="name" value="{{ $publisher->name }}" class="form-control" required>
+                                        </div>
+                                        <div class="mb-2">
+                                            <label>Address</label>
+                                            <input type="text" name="address" value="{{ $publisher->address }}" class="form-control">
+                                        </div>
+                                        <div class="mb-2">
+                                            <label>Phone</label>
+                                            <input type="text" name="phone" value="{{ $publisher->phone }}" class="form-control">
+                                        </div>
+                                        <div class="mb-2">
+                                            <label>Email</label>
+                                            <input type="email" name="email" value="{{ $publisher->email }}" class="form-control">
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="submit" class="btn btn-warning">Update</button>
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    @empty
+                        <tr>
+                            <td colspan="5" class="text-center text-danger">Data publisher tidak ditemukan.</td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+    </div>
 @endsection
