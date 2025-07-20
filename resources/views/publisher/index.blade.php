@@ -29,15 +29,15 @@
                 <thead class="table-primary text-center">
                     <tr>
                         <th>No</th>
-                        <th>Name</th>
-                        <th>Phone</th>
+                        <th>Nama</th>
+                        <th>Telepon</th>
                         <th>Email</th>
-                        <th>Actions</th>
+                        <th>Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse ($publishers as $index => $publisher)
-                        <tr>
+                        <tr class="text-center">
                             <td>{{ $index + 1 }}</td>
                             <td>{{ $publisher->name }}</td>
                             <td>{{ $publisher->phone }}</td>
