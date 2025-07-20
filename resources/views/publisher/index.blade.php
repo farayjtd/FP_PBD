@@ -14,12 +14,12 @@
 
         {{-- Add Button & Search --}}
         <div class="d-flex justify-content-between mb-3">
-            <a href="{{ route('publisher.create') }}" class="btn btn-primary">+ Add New Publisher</a>
+            <a href="{{ route('publisher.create') }}" class="btn btn-primary">+ Tambah Publisher</a>
 
             <form method="GET" action="{{ route('publisher.index') }}" class="d-flex">
                 <input type="text" name="search" placeholder="Search..." class="form-control me-2"
                     value="{{ request('search') }}">
-                <button class="btn btn-outline-primary" type="submit">Search</button>
+                <button class="btn btn-outline-primary" type="submit">Cari</button>
             </form>
         </div>
 
@@ -53,7 +53,7 @@
                                     style="display:inline-block;" onsubmit="return confirm('Are you sure?')">
                                     @csrf
                                     @method('DELETE')
-                                    <button class="btn btn-sm btn-danger">Delete</button>
+                                    <button class="btn btn-sm btn-danger">Hapus</button>
                                 </form>
                             </td>
                         </tr>
@@ -67,9 +67,9 @@
                                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                                     </div>
                                     <div class="modal-body">
-                                        <p><strong>Name:</strong> {{ $publisher->name }}</p>
-                                        <p><strong>Address:</strong> {{ $publisher->address }}</p>
-                                        <p><strong>Phone:</strong> {{ $publisher->phone }}</p>
+                                        <p><strong>Nama:</strong> {{ $publisher->name }}</p>
+                                        <p><strong>Alamat:</strong> {{ $publisher->address }}</p>
+                                        <p><strong>Telepon:</strong> {{ $publisher->phone }}</p>
                                         <p><strong>Email:</strong> {{ $publisher->email }}</p>
                                     </div>
                                     <div class="modal-footer">
@@ -82,36 +82,38 @@
                         {{-- Edit Modal --}}
                         <div class="modal fade" id="editModal{{ $publisher->id }}" tabindex="-1" aria-labelledby="editLabel{{ $publisher->id }}" aria-hidden="true">
                             <div class="modal-dialog">
-                                <form action="{{ route('publisher.update', $publisher->id) }}" method="POST" class="modal-content">
-                                    @csrf
-                                    @method('PUT')
-                                    <div class="modal-header bg-warning">
-                                        <h5 class="modal-title" id="editLabel{{ $publisher->id }}">Edit Publisher</h5>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                                    </div>
-                                    <div class="modal-body">
-                                        <div class="mb-2">
-                                            <label>Name</label>
-                                            <input type="text" name="name" value="{{ $publisher->name }}" class="form-control" required>
+                                <div class="modal-content">
+                                    <form action="{{ route('publisher.update', $publisher->id) }}" method="POST" class="modal-content">
+                                        @csrf
+                                        @method('PUT')
+                                        <div class="modal-header bg-warning">
+                                            <h5 class="modal-title" id="editLabel{{ $publisher->id }}">Edit Publisher</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                                         </div>
-                                        <div class="mb-2">
-                                            <label>Address</label>
-                                            <input type="text" name="address" value="{{ $publisher->address }}" class="form-control">
+                                        <div class="modal-body">
+                                            <div class="mb-2">
+                                                <label>Nama</label>
+                                                <input type="text" name="name" value="{{ $publisher->name }}" class="form-control" required>
+                                            </div>
+                                            <div class="mb-2">
+                                                <label>Alamat</label>
+                                                <input type="text" name="address" value="{{ $publisher->address }}" class="form-control">
+                                            </div>
+                                            <div class="mb-2">
+                                                <label>Telepon</label>
+                                                <input type="text" name="phone" value="{{ $publisher->phone }}" class="form-control">
+                                            </div>
+                                            <div class="mb-2">
+                                                <label>Email</label>
+                                                <input type="email" name="email" value="{{ $publisher->email }}" class="form-control">
+                                            </div>
                                         </div>
-                                        <div class="mb-2">
-                                            <label>Phone</label>
-                                            <input type="text" name="phone" value="{{ $publisher->phone }}" class="form-control">
+                                        <div class="modal-footer">
+                                            <button type="submit" class="btn btn-warning">Perbarui</button>
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
                                         </div>
-                                        <div class="mb-2">
-                                            <label>Email</label>
-                                            <input type="email" name="email" value="{{ $publisher->email }}" class="form-control">
-                                        </div>
-                                    </div>
-                                    <div class="modal-footer">
-                                        <button type="submit" class="btn btn-warning">Update</button>
-                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                                    </div>
-                                </form>
+                                    </form>
+                                </div>
                             </div>
                         </div>
                     @empty

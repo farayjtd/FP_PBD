@@ -14,7 +14,7 @@
 
         {{-- Add Button & Search --}}
         <div class="d-flex justify-content-between mb-3">
-            <a href="{{ route('member.create') }}" class="btn btn-primary">+ Add New Member</a>
+            <a href="{{ route('member.create') }}" class="btn btn-primary">+ Tambah Member Baru</a>
 
             <form method="GET" action="{{ route('member.index') }}" class="d-flex">
                 <input type="text" name="search" placeholder="Search..." class="form-control me-2"
@@ -26,7 +26,7 @@
                     <option value="inactive_oldest" {{ request('filter') == 'inactive_oldest' ? 'selected' : '' }}>Inactive - Oldest</option>
                     <option value="inactive_newest" {{ request('filter') == 'inactive_newest' ? 'selected' : '' }}>Inactive - Newest</option>
                 </select>
-                <button class="btn btn-outline-primary" type="submit">Search</button>
+                <button class="btn btn-outline-primary" type="submit">Cari</button>
             </form>
         </div>
 
@@ -36,11 +36,11 @@
                 <thead class="table-primary text-center">
                     <tr>
                         <th>No</th>
-                        <th>Name</th>
+                        <th>Nama</th>
                         <th>Email</th>
-                        <th>Phone</th>
+                        <th>Telepon</th>
                         <th>Status</th>
-                        <th>Action</th>
+                        <th>Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -66,7 +66,7 @@
                                     style="display:inline-block;" onsubmit="return confirm('Are you sure?')">
                                     @csrf
                                     @method('DELETE')
-                                    <button class="btn btn-sm btn-danger">Delete</button>
+                                    <button class="btn btn-sm btn-danger">Hapus</button>
                                 </form>
                             </td>
                         </tr>
@@ -80,13 +80,13 @@
                                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                                     </div>
                                     <div class="modal-body">
-                                        <p><strong>Name:</strong> {{ $member->name }}</p>
+                                        <p><strong>Nama:</strong> {{ $member->name }}</p>
                                         <p><strong>Email:</strong> {{ $member->email }}</p>
-                                        <p><strong>Phone:</strong> {{ $member->phone }}</p>
+                                        <p><strong>Telepon:</strong> {{ $member->phone }}</p>
                                         <p><strong>Status:</strong> {{ ucfirst($member->status) }}</p>
                                     </div>
                                     <div class="modal-footer">
-                                        <button class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                        <button class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
                                     </div>
                                 </div>
                             </div>
@@ -95,39 +95,41 @@
                         {{-- Edit Modal --}}
                         <div class="modal fade" id="editModal{{ $member->id }}" tabindex="-1" aria-labelledby="editLabel{{ $member->id }}" aria-hidden="true">
                             <div class="modal-dialog">
-                                <form action="{{ route('member.update', $member->id) }}" method="POST" class="modal-content">
-                                    @csrf
-                                    @method('PUT')
-                                    <div class="modal-header bg-warning">
-                                        <h5 class="modal-title" id="editLabel{{ $member->id }}">Edit Member</h5>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                                    </div>
-                                    <div class="modal-body">
-                                        <div class="mb-2">
-                                            <label>Name</label>
-                                            <input type="text" name="name" value="{{ $member->name }}" class="form-control" required>
+                                <div class="modal-content">
+                                    <form action="{{ route('member.update', $member->id) }}" method="POST" class="modal-content">
+                                        @csrf
+                                        @method('PUT')
+                                        <div class="modal-header bg-warning">
+                                            <h5 class="modal-title" id="editLabel{{ $member->id }}">Edit Member</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                                         </div>
-                                        <div class="mb-2">
-                                            <label>Email</label>
-                                            <input type="email" name="email" value="{{ $member->email }}" class="form-control">
+                                        <div class="modal-body">
+                                            <div class="mb-2">
+                                                <label>Nama</label>
+                                                <input type="text" name="name" value="{{ $member->name }}" class="form-control" required>
+                                            </div>
+                                            <div class="mb-2">
+                                                <label>Email</label>
+                                                <input type="email" name="email" value="{{ $member->email }}" class="form-control">
+                                            </div>
+                                            <div class="mb-2">
+                                                <label>Telepon</label>
+                                                <input type="text" name="phone" value="{{ $member->phone }}" class="form-control">
+                                            </div>
+                                            <div class="mb-2">
+                                                <label>Status</label>
+                                                <select name="status" class="form-control">
+                                                    <option value="active" {{ $member->status == 'active' ? 'selected' : '' }}>Active</option>
+                                                    <option value="inactive" {{ $member->status == 'inactive' ? 'selected' : '' }}>Inactive</option>
+                                                </select>
+                                            </div>
                                         </div>
-                                        <div class="mb-2">
-                                            <label>Phone</label>
-                                            <input type="text" name="phone" value="{{ $member->phone }}" class="form-control">
+                                        <div class="modal-footer">
+                                            <button type="submit" class="btn btn-warning">Perbarui</button>
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
                                         </div>
-                                        <div class="mb-2">
-                                            <label>Status</label>
-                                            <select name="status" class="form-control">
-                                                <option value="active" {{ $member->status == 'active' ? 'selected' : '' }}>Active</option>
-                                                <option value="inactive" {{ $member->status == 'inactive' ? 'selected' : '' }}>Inactive</option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                    <div class="modal-footer">
-                                        <button type="submit" class="btn btn-warning">Update</button>
-                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                                    </div>
-                                </form>
+                                    </form>
+                                </div>
                             </div>
                         </div>
                     @empty

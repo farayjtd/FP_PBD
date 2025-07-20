@@ -8,7 +8,7 @@
             <form action="{{ route('member.store') }}" method="POST">
                 @csrf
                 <div class="mb-3">
-                    <label for="name" class="form-label">Name</label>
+                    <label for="name" class="form-label">Nama</label>
                     <input type="text" name="name" id="name" class="form-control" required>
                 </div>
 
@@ -18,17 +18,17 @@
                 </div>
 
                 <div class="mb-3">
-                    <label for="phone" class="form-label">Phone</label>
+                    <label for="phone" class="form-label">Telepon</label>
                     <input type="text" name="phone" id="phone" class="form-control" required>
                 </div>
 
                 <div class="mb-3">
-                    <label for="address" class="form-label">Address</label>
+                    <label for="address" class="form-label">Alamat</label>
                     <input type="text" name="address" id="address" class="form-control" required>
                 </div>
 
                 <div class="mb-3">
-                    <label for="joined" class="form-label">Join Date</label>
+                    <label for="joined" class="form-label">Tanggal Bergabung</label>
                     <input type="date" name="joined" id="joined" class="form-control" required>
                 </div>
 
@@ -40,8 +40,8 @@
                     </select>
                 </div>
 
-                <button type="submit" class="btn btn-primary">Save</button>
-                <a href="{{ route('member.index') }}" class="btn btn-secondary">Back</a>
+                <button type="submit" class="btn btn-primary">Simpan</button>
+                <a href="{{ route('member.index') }}" class="btn btn-secondary">Kembali</a>
             </form>
         </div>
     </div>
