@@ -45,7 +45,7 @@
                 <tbody>
                     @forelse($borrowings as $index => $borrowing)
                         <tr class="text-center">
-                            <td>{{ $index + 1 }}</td>
+                            <td>{{ $borrowings->firstItem() + $index }}</td>
                             <td>{{ $borrowing->member->name ?? 'N/A' }}</td>
                             <td>{{ $borrowing->book->title ?? 'N/A' }}</td>
                             <td>{{ $borrowing->borrowed }}</td>
@@ -160,6 +160,11 @@
                     @endforelse
                 </tbody>
             </table>
+
+            {{-- Pagination --}}
+            <div class="d-flex justify-content-center mt-3">
+                {{ $borrowings->links() }}
+            </div>
         </div>
     </div>
 @endsection

@@ -32,6 +32,8 @@ class BorrowingController extends Controller
         $members = Member::all();
         $books = Book::all();
 
+        $borrowings = $query->paginate(10)->withQueryString();
+
         return view('borrowing.index', compact('borrowings', 'members', 'books'));
     }
 

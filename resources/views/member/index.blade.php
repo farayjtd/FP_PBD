@@ -46,7 +46,7 @@
                 <tbody>
                     @forelse ($members as $index => $member)
                         <tr class="text-center">
-                            <td>{{ $index + 1 }}</td>
+                            <td>{{ $members->firstItem() + $index }}</td>
                             <td>{{ $member->name }}</td>
                             <td>{{ $member->email }}</td>
                             <td>{{ $member->phone }}</td>
@@ -139,6 +139,11 @@
                     @endforelse
                 </tbody>
             </table>
+
+            {{-- Pagination --}}
+            <div class="d-flex justify-content-center mt-3">
+                {{ $members->links() }}
+            </div>
         </div>
     </div>
 @endsection

@@ -38,7 +38,7 @@
                 <tbody>
                     @forelse ($publishers as $index => $publisher)
                         <tr class="text-center">
-                            <td>{{ $index + 1 }}</td>
+                            <td>{{ $publishers->firstItem() + $index }}</td>
                             <td>{{ $publisher->name }}</td>
                             <td>{{ $publisher->phone }}</td>
                             <td>{{ $publisher->email }}</td>
@@ -123,6 +123,11 @@
                     @endforelse
                 </tbody>
             </table>
+
+            {{-- Pagination --}}
+            <div class="d-flex justify-content-center mt-3">
+                {{ $publishers->links() }}
+            </div>
         </div>
     </div>
 @endsection

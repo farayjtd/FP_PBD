@@ -2,11 +2,14 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Book extends Model
 {
-    protected $table = 'book';
+    use HasFactory;
+
+    protected $table = 'books';
     
     protected $guarded = [];
 
@@ -22,7 +25,8 @@ class Book extends Model
 
     public function categories()
     {
-        return $this->belongsToMany(Category::class, 'book_category');
+        return $this->belongsToMany(Category::class, 'book_categories');
+
     }
 
     protected static function boot()

@@ -29,17 +29,15 @@
                 <thead class="table-primary text-center">
                     <tr>
                         <th>No</th>
-                        <th>Name</th>
-                        <th>Slug</th>
+                        <th>Kategori</th>
                         <th>Action</th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse ($categories as $index => $category)
                         <tr class="text-center">
-                            <td>{{ $index + 1 }}</td>
+                            <td>{{ $categories->firstItem() + $index }}</td>
                             <td>{{ $category->name }}</td>
-                            <td>{{ $category->slug }}</td>
                             <td>
                                 <button class="btn btn-sm btn-info me-1" data-bs-toggle="modal"
                                     data-bs-target="#detailModal{{ $category->id }}">Detail</button>
@@ -65,8 +63,7 @@
                                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                                     </div>
                                     <div class="modal-body">
-                                        <p><strong>Name:</strong> {{ $category->name }}</p>
-                                        <p><strong>Slug:</strong> {{ $category->slug }}</p>
+                                        <p><strong>Kategori:</strong> {{ $category->name }}</p>
                                         <p><strong>Created:</strong> {{ $category->created_at }}</p>
                                         <p><strong>Updated:</strong> {{ $category->updated_at }}</p>
                                     </div>
@@ -90,12 +87,8 @@
                                         </div>
                                         <div class="modal-body">
                                             <div class="mb-2">
-                                                <label>Name</label>
+                                                <label>Kategori</label>
                                                 <input type="text" name="name" value="{{ $category->name }}" class="form-control" required>
-                                            </div>
-                                            <div class="mb-2">
-                                                <label>Slug</label>
-                                                <input type="text" name="slug" value="{{ $category->slug }}" class="form-control" required>
                                             </div>
                                         </div>
                                         <div class="modal-footer">
@@ -113,6 +106,11 @@
                     @endforelse
                 </tbody>
             </table>
+
+            {{-- Pagination --}}
+            <div class="d-flex justify-content-center mt-3">
+                {{ $categories->links() }}
+            </div>
         </div>
     </div>
 @endsection

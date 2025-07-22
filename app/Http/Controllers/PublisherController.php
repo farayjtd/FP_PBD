@@ -21,7 +21,7 @@ class PublisherController extends Controller
             });
         }
 
-        $publishers = $query->get();
+        $publishers = $query->orderBy('name')->paginate(10)->withQueryString(); // pagination aktif
 
         return view('publisher.index', compact('publishers'));
     }

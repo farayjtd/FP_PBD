@@ -39,10 +39,11 @@ class MemberController extends Controller
             $query->orderBy('joined', 'desc');
         }
 
-        $members = $query->get();
+        $members = $query->paginate(10)->withQueryString();
 
         return view('member.index', compact('members', 'search', 'filter'));
     }
+
 
     public function create()
     {

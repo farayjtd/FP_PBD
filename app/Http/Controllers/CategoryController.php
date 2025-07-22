@@ -18,6 +18,8 @@ class CategoryController extends Controller
         }
 
         $categories = $query->get();
+        
+        $categories = $query->paginate(10)->withQueryString();
 
         return view('category.index', compact('categories'));
     }

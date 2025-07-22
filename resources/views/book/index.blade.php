@@ -48,7 +48,7 @@
                 <tbody>
                     @forelse($books as $index => $book)
                         <tr class="text-center">
-                            <td>{{ $index + 1 }}</td>
+                            <td>{{ $books->firstItem() + $index }}</td>
                             <td>{{ $book->title }}</td>
                             <td>{{ $book->author }}</td>
                             <td>{{ $book->publisher->name }}</td>
@@ -233,6 +233,11 @@
                     @endforelse
                 </tbody>
             </table>
+
+            {{-- Pagination --}}
+            <div class="d-flex justify-content-center mt-3">
+                {{ $books->links() }}
+            </div>
         </div>
     </div>
 @endsection
