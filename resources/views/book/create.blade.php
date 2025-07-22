@@ -104,8 +104,8 @@
                                 <label for="book_condition" class="form-label">Kondisi Buku</label>
                                 <select name="book_condition" id="book_condition" class="form-select">
                                     <option value="">-- Pilih --</option>
-                                    <option value="baru">Baru</option>
-                                    <option value="bekas">Bekas</option>
+                                    <option value="new">Baru</option>
+                                    <option value="used">Bekas</option>
                                 </select>
                             </div>
                         </div>
