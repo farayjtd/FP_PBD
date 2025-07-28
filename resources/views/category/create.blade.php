@@ -12,11 +12,6 @@
                     <input type="text" name="name" id="name" class="form-control" required>
                 </div>
 
-                <div class="mb-3">
-                    <label for="slug" class="form-label">Slug</label>
-                    <input type="text" name="slug" id="slug" class="form-control" required>
-                </div>
-
                 <button type="submit" class="btn btn-primary">Simpan</button>
                 <a href="{{ route('category.index') }}" class="btn btn-secondary">Kembali</a>
             </form>

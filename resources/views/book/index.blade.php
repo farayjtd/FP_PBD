@@ -211,8 +211,8 @@
                                                         <label class="form-label">Kondisi</label>
                                                         <select name="book_condition" class="form-select">
                                                             <option value="">-- Pilih --</option>
-                                                            <option value="baru" {{ ($book->detail->book_condition ?? '') == 'baru' ? 'selected' : '' }}>Baru</option>
-                                                            <option value="bekas" {{ ($book->detail->book_condition ?? '') == 'bekas' ? 'selected' : '' }}>Bekas</option>
+                                                            <option value="new" {{ ($book->detail->book_condition ?? '') == 'new' ? 'selected' : '' }}>Baru</option>
+                                                            <option value="used" {{ ($book->detail->book_condition ?? '') == 'used' ? 'selected' : '' }}>Bekas</option>
                                                         </select>
                                                     </div>
                                                 </div>
